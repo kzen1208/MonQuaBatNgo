@@ -1,0 +1,42 @@
+/* slide to confirm: a pill with a handle that fills the track as it is dragged */
+.sc-root { position: relative; display: inline-block; vertical-align: middle; font-family: var(--display, inherit); font-weight: 400; font-synthesis: none; }
+.sc-root[data-disabled] { pointer-events: none; opacity: .55; }
+
+.sc-track { position: relative; width: 100%; height: 100%; border-radius: var(--sc-radius); background: var(--sc-track);
+  cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+.sc-root[data-held] .sc-track { cursor: grabbing; }
+.sc-root[data-phase="pending"] .sc-track, .sc-root[data-phase="done"] .sc-track { cursor: default; }
+
+.sc-say { position: absolute; inset: 0; display: grid; place-items: center; white-space: nowrap; pointer-events: none;
+  font-size: var(--sc-font); line-height: 1; letter-spacing: 0; }
+.sc-say > span { grid-area: 1 / 1; transition: opacity .2s ease, filter .2s ease; }
+.sc-label { color: var(--sc-say); }
+.sc-err { color: var(--sc-no); opacity: 0; filter: blur(2px); }
+.sc-root[data-phase="error"] .sc-label { opacity: 0; filter: blur(2px); }
+.sc-root[data-phase="error"] .sc-err { opacity: 1; filter: none; }
+
+.sc-capsule { position: absolute; top: var(--sc-pad); left: var(--sc-pad); width: 0; height: calc(100% - var(--sc-pad) * 2);
+  border-radius: var(--sc-grip-r); overflow: hidden; outline: none; background: var(--sc-ink); color: var(--sc-on-ink); transition: background-color .2s ease, color .2s ease; }
+.sc-root[data-phase="done"] .sc-capsule { background: var(--sc-ok); color: var(--sc-on-ok); }
+.sc-root[data-phase="error"] .sc-capsule { background: var(--sc-no); color: var(--sc-on-no); }
+.sc-capsule:focus-visible { box-shadow: inset 0 0 0 2px var(--sc-track); }
+.sc-content { position: absolute; top: 0; bottom: 0; left: 0; width: var(--sc-inner); }
+
+.sc-layer { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; pointer-events: none;
+  font-size: var(--sc-font); line-height: 1; letter-spacing: 0; }
+.sc-layer svg { display: block; }
+.sc-arrow { transition: filter .2s ease; }
+.sc-root[data-phase="pending"] .sc-arrow { filter: blur(2px); }
+.sc-spin { opacity: 0; filter: blur(2px); transition: filter .2s ease; }
+.sc-root[data-phase="pending"] .sc-spin { filter: none; }
+.sc-done { opacity: 0; transform: scale(.95); transition: opacity .2s cubic-bezier(.23,1,.32,1), transform .2s cubic-bezier(.23,1,.32,1); }
+.sc-root[data-phase="done"] .sc-done { opacity: 1; transform: none; }
+
+.sc-ring { animation: sc-spin 1s linear infinite; animation-play-state: paused; }
+.sc-root[data-phase="pending"] .sc-ring { animation-play-state: running; }
+@keyframes sc-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .sc-ring { animation: sc-breathe 1.4s ease-in-out infinite; animation-play-state: paused; }
+  .sc-root[data-phase="pending"] .sc-ring { animation-play-state: running; }
+  @keyframes sc-breathe { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+}

@@ -1,0 +1,56 @@
+/* the music corner: a small frosted pill, play / title / next */
+#music { position: fixed; right: 16px; bottom: 16px; z-index: 30; display: flex; align-items: center; gap: 8px; padding: 6px;
+  border-radius: 999px; color: #5a1b34; background: rgba(255,236,244,.8); border: 1px solid rgba(255,255,255,.75);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); box-shadow: 0 10px 30px rgba(120,30,70,.28);
+  font-family: var(--display); font-weight: 400; font-synthesis: none; transition: transform .25s cubic-bezier(.23,1,.32,1), box-shadow .25s; }
+#music:hover, #music:focus-within { box-shadow: 0 14px 38px rgba(120,30,70,.36); }
+
+#music button { display: grid; place-items: center; flex: none; padding: 0; border: 0; cursor: pointer; color: inherit; background: none;
+  -webkit-tap-highlight-color: transparent; transition: transform .12s ease, background .2s ease; }
+#music button:active { transform: scale(.92); }
+#music button:focus-visible { outline: 2px solid #e0407e; outline-offset: 2px; }
+
+#music .mp-play { position: relative; width: 44px; height: 44px; border-radius: 50%; background: #ffc2dc; box-shadow: inset 0 0 0 1px rgba(255,255,255,.6); }
+#music .mp-play:hover { background: #ffb0d1; }
+#music .mp-play svg { grid-area: 1 / 1; transition: opacity .18s ease, transform .18s ease; }
+#music .mp-play .i-pause { opacity: 0; transform: scale(.6); }
+#music.playing .mp-play .i-play { opacity: 0; transform: scale(.6); }
+#music.playing .mp-play .i-pause { opacity: 1; transform: none; }
+#music .mp-ring { position: absolute; inset: -3px; border-radius: 50%; border: 2px solid transparent; border-top-color: #e0407e; border-right-color: rgba(224,64,126,.35);
+  opacity: 0; transition: opacity .25s; }
+#music.playing .mp-ring { opacity: 1; animation: mp-spin 2.4s linear infinite; }
+@keyframes mp-spin { to { transform: rotate(360deg); } }
+
+#music.invite:not(.playing) .mp-play { animation: mp-invite 2.4s ease-out infinite; }
+@keyframes mp-invite {
+  0%   { box-shadow: inset 0 0 0 1px rgba(255,255,255,.6), 0 0 0 0 rgba(224,64,126,.5); }
+  70%, 100% { box-shadow: inset 0 0 0 1px rgba(255,255,255,.6), 0 0 0 14px rgba(224,64,126,0); }
+}
+
+#music .mp-next { width: 34px; height: 34px; border-radius: 50%; }
+#music .mp-next:hover { background: rgba(224,64,126,.14); }
+
+#music .mp-info { width: 152px; min-width: 0; display: grid; gap: 6px; padding: 0 2px; }
+#music .mp-title { position: relative; overflow: hidden; white-space: nowrap; font-size: 15px; line-height: 1.2; -webkit-mask-image: linear-gradient(90deg, #000 86%, transparent); mask-image: linear-gradient(90deg, #000 86%, transparent); }
+#music .mp-title span { display: inline-block; }
+#music .mp-title.long span { animation: mp-marquee 11s linear infinite alternate; }
+@keyframes mp-marquee { 0%, 12% { transform: translateX(0); } 88%, 100% { transform: translateX(var(--mp-shift, 0)); } }
+#music .mp-bar { position: relative; height: 4px; border-radius: 4px; background: rgba(90,27,52,.16); cursor: pointer; touch-action: none; }
+#music .mp-bar i { position: absolute; inset: 0 auto 0 0; width: calc(var(--p, 0) * 100%); border-radius: inherit; background: #e0407e; }
+#music .mp-bar::before { content: ""; position: absolute; inset: -8px 0; }
+
+/* the volume slides out beside the pill when you hover it (not on touch screens) */
+#music .mp-vol { width: 0; opacity: 0; overflow: hidden; accent-color: #e0407e; transition: width .25s cubic-bezier(.23,1,.32,1), opacity .2s; }
+@media (hover: hover) { #music:hover .mp-vol, #music:focus-within .mp-vol { width: 70px; opacity: 1; margin-right: 6px; } }
+
+/* nothing to play yet */
+#music.empty .mp-info { opacity: .7; }
+
+/* the camera button sits above the music corner */
+#shutter { bottom: 76px; }
+
+@media (max-width: 700px) {
+  #music .mp-info { display: none; }
+  #music { gap: 4px; }
+}
+@media (prefers-reduced-motion: reduce) { #music.playing .mp-ring, #music .mp-title.long span, #music.invite .mp-play { animation: none; } }

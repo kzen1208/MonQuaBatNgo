@@ -1,0 +1,48 @@
+/* ---- the slide-in menu: colour layers, then the panel, then the words ---- */
+#menu { position: fixed; inset: 0; z-index: 50; pointer-events: none; }
+#menu.hidden { display: none; }
+
+#menu .sm-header { position: absolute; top: 0; left: 0; width: 100%; display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 20px; pointer-events: none; z-index: 20; }
+#menu .sm-logo, #menu .sm-toggle { pointer-events: auto; display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px;
+  font-family: var(--display); font-size: 19px; line-height: 1; color: #4a2433; text-decoration: none; cursor: pointer;
+  background: rgba(255,255,255,.58); border: 1px solid rgba(255,255,255,.85);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 10px 26px -12px rgba(176,52,106,.55);
+  transition: background .2s, transform .15s; }
+#menu .sm-logo span { color: var(--sm-accent); }
+#menu .sm-logo:hover, #menu .sm-toggle:hover { background: rgba(255,255,255,.85); }
+#menu .sm-toggle:active { transform: scale(.97); }
+#menu .sm-toggle:focus-visible, #menu .sm-logo:focus-visible { outline: 2px solid var(--sm-accent); outline-offset: 3px; }
+
+#menu .sm-toggle-wrap { position: relative; display: inline-block; height: 1em; overflow: hidden; white-space: nowrap; min-width: 2.7em; text-align: left; }
+#menu .sm-toggle-inner { display: flex; flex-direction: column; line-height: 1; }
+#menu .sm-toggle-line { display: block; height: 1em; line-height: 1; }
+#menu .sm-icon { position: relative; width: 14px; height: 14px; flex: 0 0 14px; will-change: transform; }
+#menu .sm-icon-line { position: absolute; left: 50%; top: 50%; width: 100%; height: 2px; border-radius: 2px; background: currentColor;
+  transform: translate(-50%, -50%); will-change: transform; }
+#menu .sm-icon-line.sm-v { transform: translate(-50%, -50%) rotate(90deg); }
+
+#menu .sm-prelayers, #menu .sm-panel { position: absolute; top: 0; bottom: 0; right: 0; width: clamp(280px, 38vw, 440px); }
+#menu[data-position='left'] .sm-prelayers, #menu[data-position='left'] .sm-panel { right: auto; left: 0; }
+#menu .sm-prelayers { z-index: 5; pointer-events: none; overflow: hidden; }
+#menu .sm-prelayer { position: absolute; inset: 0; transform: translateX(100%); }
+#menu[data-position='left'] .sm-prelayer { transform: translateX(-100%); }
+
+#menu .sm-panel { z-index: 10; display: flex; flex-direction: column; padding: 6.5em 2em 2em; overflow-y: auto; visibility: hidden;
+  background: #fff7fa; transform: translateX(100%); box-shadow: -30px 0 60px -30px rgba(176,52,106,.35); }
+#menu[data-position='left'] .sm-panel { transform: translateX(-100%); }
+#menu.sm-active .sm-panel { visibility: visible; }
+#menu.sm-open .sm-panel { pointer-events: auto; }
+#menu .sm-panel-inner { flex: 1; display: flex; flex-direction: column; gap: 1.25rem; }
+#menu .sm-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .4rem; }
+#menu .sm-itemwrap { position: relative; overflow: hidden; line-height: 1.05; padding: .08em 0; }
+#menu .sm-item { position: relative; display: inline-block; padding-right: 1.3em; text-decoration: none; cursor: pointer; white-space: nowrap;
+  font-family: var(--display); font-weight: 400; font-synthesis: none; letter-spacing: 0;
+  font-size: clamp(1.9rem, 3.6vw, 2.6rem); line-height: 1.05; color: #4a2433; transition: color .2s; }
+#menu .sm-item:hover, #menu .sm-item:focus-visible { color: var(--sm-accent); outline: none; }
+#menu .sm-itemlabel { display: inline-block; transform: translateY(140%) rotate(10deg); transform-origin: 50% 100%; will-change: transform; }
+#menu .sm-num { position: absolute; top: .15em; right: .2em; font: 400 15px/1 -apple-system, BlinkMacSystemFont, sans-serif; color: var(--sm-accent); opacity: 0; pointer-events: none; user-select: none; }
+#menu .sm-note { margin: auto 0 0; padding-top: 2rem; font-family: var(--display); font-size: 1.35rem; color: #b07a90; opacity: 0; }
+
+@media (max-width: 640px) { #menu .sm-prelayers, #menu .sm-panel { width: 100%; } }
+@media (prefers-reduced-motion: reduce) { #menu * { transition-duration: .01ms !important; } }

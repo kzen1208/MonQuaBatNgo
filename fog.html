@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="vi" class="lock">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>món quà bất ngờ</title>
+<link rel="preload" href="font/1FTV-VIP-Super-Bouncer.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="css/fog.css">
+<link rel="stylesheet" href="css/glass-folder.css">
+<link rel="stylesheet" href="css/staggered-menu.css">
+<link rel="stylesheet" href="css/slide-commit.css">
+<link rel="stylesheet" href="css/music.css">
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection@0.4.1646425229/face_detection.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<main id="mirror">
+  <canvas id="view"></canvas>
+</main>
+<video id="cam" playsinline muted autoplay></video>
+
+<div id="start">
+  <h1>
+    <span data-bt='{"effect":"blur","direction":"top","trigger":"load","blur":16,"distance":42,"stepDuration":0.55,"animateBy":"words","delay":170}'>món quà bất ngờ</span>
+    <span class="to">
+      <span data-bt='{"effect":"blur","direction":"top","trigger":"load","blur":16,"distance":42,"stepDuration":0.55,"animateBy":"words","startDelay":700}'>gửi</span>
+      <span class="name" data-bt='{"effect":"blur","direction":"top","trigger":"load","blur":16,"distance":42,"stepDuration":0.55,"animateBy":"letters","delay":70,"startDelay":950,"fromColor":"#ff8fb8"}'>Thanh Nhã Linh ♡</span>
+    </span>
+  </h1>
+  <p>Mọi thứ chạy ngay trong trình duyệt. Không có hình ảnh, âm thanh hay dữ liệu nào rời khỏi máy này.</p>
+  <div id="startSlide"></div>
+  <button id="go" class="sr-only" type="button" tabindex="-1">bắt đầu</button>
+  <p id="err"></p>
+</div>
+
+<div id="status" class="gone"></div>
+<div id="hint" class="hidden"><b>thổi</b> hoặc giữ <b>phím cách</b> để hà hơi &nbsp;·&nbsp; <b>chụm ngón cái và ngón trỏ</b> để vẽ &nbsp;·&nbsp; <b>quét bàn tay</b> qua kính để lau</div>
+<pre id="dbg" class="hidden"></pre>
+<div id="flash"></div>
+
+<label id="brush" class="hidden">nét vẽ <input id="size" type="range" min="7" max="38" step="1" value="15"></label>
+<button id="shutter" class="hidden" title="chụp ảnh (S)" aria-label="chụp ảnh">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 8.5a2 2 0 0 1 2-2h2.2l1.2-2h6.8l1.2 2H19a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+    <circle cx="12" cy="13" r="3.6"/>
+  </svg>
+</button>
+
+<section id="after">
+  <div class="wrap">
+    <p class="eyebrow" data-bt='{"effect":"focus","animateBy":"letters","delay":26,"stepDuration":0.45,"blur":8,"distance":0}'>bức vẽ của em</p>
+    <h2 data-bt='{"effect":"blur","animateBy":"words","direction":"top","delay":170,"stepDuration":0.5,"blur":14,"distance":46,"fromColor":"#f0a6c0","focusOnHover":true}'>em vất vả rồi | nghỉ chút nha.</h2>
+    <p class="lede" data-bt='{"effect":"drift","animateBy":"words","direction":"left","delay":90,"stepDuration":0.45,"blur":8,"distance":24}'>cứ nhõng nhẽo đi, | có anh dỗ em mà.</p>
+
+    <p class="eyebrow" data-bt='{"effect":"focus","animateBy":"letters","delay":22,"stepDuration":0.4,"blur":6,"distance":0}'>vài lời dỗ dành</p>
+    <div class="grid">
+      <div class="card note" style="--brand:#D6568A" data-colors='["#F2BECD", "#F7D2DD", "#E78FB3", "#FFD6E0"]'>
+        <p><span class="vi">xinh lắm đó</span></p>
+      </div>
+      <div class="card note" style="--brand:#8A63B5" data-colors='["#CDB4DB", "#E4D4F0", "#A98BC9", "#F3E8FF"]'>
+        <p><span class="vi">dịu dàng như sương</span></p>
+      </div>
+      <div class="card note" style="--brand:#E2764F" data-colors='["#FFC8A2", "#FFE0CC", "#FF9F80", "#FFF0E6"]'>
+        <p><span class="vi">cười lên nào</span></p>
+      </div>
+      <div class="card note" style="--brand:#E0559A" data-colors='["#FFB3D1", "#B8E1FF", "#FFD6E8", "#D7F0FF"]'>
+        <p><span class="vi">ngọt như kẹo bông</span></p>
+      </div>
+      <div class="card note" style="--brand:#CF4B6C" data-colors='["#F4A6B7", "#FAD2DB", "#E27D95", "#FFE5EA"]'>
+        <p><span class="vi">hôm nay em đẹp lắm</span></p>
+      </div>
+      <div class="card note" style="--brand:#C98A12" data-colors='["#FFE7A0", "#FFF3CC", "#FFD166", "#FFF9E3"]'>
+        <p><span class="vi">nghỉ một chút nha</span></p>
+      </div>
+      <div class="card note" style="--brand:#3E9C7B" data-colors='["#BFE8D6", "#DDF4EA", "#8FD3B6", "#F0FBF6"]'>
+        <p><span class="vi">em giỏi lắm rồi</span></p>
+      </div>
+      <div class="card note" style="--brand:#B24A7A" data-colors='["#F2BECD", "#CDB4DB", "#FFC8A2", "#BFE8D6"]'>
+        <p><span class="vi">ôm em một cái nè</span></p>
+      </div>
+
+      <figure class="card photo" id="photoCard">
+        <img id="shotImg" alt="bức vẽ của em trên lớp sương">
+        <figcaption class="meta">
+          <span id="shotCap"></span>
+          <span class="spacer"></span>
+          <a id="saveLink" class="btn">lưu ảnh</a>
+          <button id="back" class="btn ghost" type="button">về lại gương</button>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section id="loop">
+  <div class="dots" aria-hidden="true"></div>
+  <p class="eyebrow" data-bt='{"effect":"focus","animateBy":"letters","delay":24,"stepDuration":0.4,"blur":6,"distance":0}'>kéo thử xem nha</p>
+  <div class="tl-stage" data-tl='{"text":"anh yêu em","shape":"wave","speed":84,"curviness":84,"fontSize":42,"ribbonColor":"#ff5c9a","ribbonWidth":92,"edgeFade":0.22,"draggable":true,"scrollBoost":0.7}'></div>
+  <div class="tl-stage" data-tl='{"text":"em iu cố lên hoặc đừng cố quá sức nha","shape":"line","tilt":-2.5,"direction":"reverse","speed":58,"fontSize":30,"fontWeight":700,"ribbonColor":"#ffd0e1","color":"#5a1b34","ribbonWidth":62,"viewH":150,"edgeFade":0.2,"separator":"✦","draggable":true}'></div>
+  <p class="loop-foot" data-bt='{"effect":"blur","animateBy":"words","direction":"bottom","delay":150,"stepDuration":0.5,"blur":12,"distance":30,"fromColor":"#ff8fb8"}'>mệt thì ghé đây nha.</p>
+</section>
+
+<section id="desk">
+  <div class="dots" aria-hidden="true"></div>
+  <div class="deskwrap">
+    <div class="desk-grid" id="deskGrid"></div>
+  </div>
+  <p class="desk-hint">rê chuột để nghiêng · bấm để mở · + để thêm</p>
+</section>
+<div id="menu" class="hidden"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<div id="confirm" class="hidden" role="dialog" aria-label="giữ bức vẽ này nhé?">
+  <div class="sheet">
+    <img id="confirmImg" alt="bức vẽ của em trên lớp sương">
+    <p>giữ bức này nha?</p>
+    <div class="row">
+      <div id="keepSlide"></div>
+      <div id="againSlide"></div>
+      <button id="keep" class="sr-only" type="button" tabindex="-1">giữ</button>
+      <button id="again" class="sr-only" type="button" tabindex="-1">vẽ lại</button>
+    </div>
+    <small class="keys">hoặc bấm Enter để giữ · Esc để vẽ lại</small>
+  </div>
+</div>
+
+<script src="js/pixel-card.js"></script>
+<script src="js/glass-folder.js"></script>
+<script src="js/blur-text.js"></script>
+<script src="js/staggered-menu.js"></script>
+<script src="js/slide-commit.js"></script>
+<script src="js/text-loop.js"></script>
+<script src="js/fog.js"></script>
+<script src="js/gallery.js"></script>
+<script src="js/music.js"></script>
+</body>
+</html>
