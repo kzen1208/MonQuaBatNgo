@@ -112,7 +112,7 @@
 
   const audio = new Audio();
   audio.preload = 'metadata';
-  let tracks = [], at = 0, userVol = VOL, fadeId = 0, everPlayed = false, userPaused = false, armed = false, userToggled = false;
+  let tracks = [], at = 0, userVol = VOL, fadeId = 0, everPlayed = false, userPaused = false, armed = false, userToggled = false, expectPause = false;
   let pane = 'mine', spInfoLoaded = false, open = true;
   let liked = new Set();
   const store = {
@@ -226,7 +226,7 @@
     fadeTo(userVol, FADE_MS);
     return true;
   }
-  const pause = () => fadeTo(0, FADE_MS, () => audio.pause());
+  const pause = () => { expectPause = true; fadeTo(0, FADE_MS, () => audio.pause()); };
   function go(step, byUser) {
     if (!tracks.length) return;
     const was = !audio.paused;
@@ -241,7 +241,7 @@
 
   function syncPlaying() {
     const on = !audio.paused;
-    if (on) { everPlayed = true; el.classList.remove('invite'); }
+    if (on) { everPlayed = true; expectPause = false; el.classList.remove('invite'); }
     el.classList.toggle('playing', on);
     for (const b of qa('.mc-play, .mc-bigplay')) b.setAttribute('aria-label', on ? 'tạm dừng nhạc' : 'phát nhạc');
     refreshGate();
@@ -249,7 +249,12 @@
   // the mic hears the speakers: the breath detector is told whether anything is playing
   function refreshGate() { musicPlaying = (!audio.paused && !audio.muted && audio.volume > 0) || pane === 'sp'; }
   audio.addEventListener('play', syncPlaying);
-  audio.addEventListener('pause', syncPlaying);
+  audio.addEventListener('pause', () => {
+    syncPlaying();
+    // the system stopped it (a phone does when the camera and microphone open, or after a call): start it again
+    if (!expectPause && !audio.ended && !userPaused && pane === 'mine' && !document.hidden) { setTimeout(resume, 350); setTimeout(resume, 1800); }
+  });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) resume(); });
   audio.addEventListener('volumechange', refreshGate);
   audio.addEventListener('ended', () => (tracks.length > 1 ? go(1, false) : (audio.currentTime = 0, audio.play().catch(() => {}))));
   audio.addEventListener('error', () => { if (tracks.length > 1) go(1, false); });
@@ -388,6 +393,13 @@
     try { await audio.play(); fadeTo(userVol, FADE_IN_MS); }
     catch (e) { armFirstGesture(); }
   }
+  async function resume() {
+    if (userPaused || pane !== 'mine' || !tracks.length || !audio.paused || audio.ended || document.hidden) return;
+    if (!audio.src) loadTrack();
+    try { await audio.play(); setVol(userVol); }
+    catch (e) { armFirstGesture(); }                                      // not allowed yet: the next touch will do it
+  }
+  window.musicResume = resume;
   function armFirstGesture() {
     if (armed) return;
     armed = true;

@@ -89,7 +89,10 @@ const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 
 // ---- canvas sizing ----
 function resize() {
-  W = window.innerWidth; H = window.innerHeight;
+  // the size of the mirror's own box, not the window: on a phone "100vh" is taller than what you can see (the browser
+  // toolbars), and a canvas whose drawing size differs from its box in proportion stretches the picture
+  const box = canvas.parentElement.getBoundingClientRect();
+  W = Math.round(box.width) || window.innerWidth; H = Math.round(box.height) || window.innerHeight;
   dpr = Math.min(window.devicePixelRatio || 1, 2);
   S = dpr * FROST_SCALE;
   canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
@@ -115,6 +118,10 @@ function resetFog() {
   fc.fillRect(0, 0, fogCanvas.width, fogCanvas.height);
 }
 window.addEventListener('resize', resize);
+if (window.ResizeObserver) {                                  // the box also changes when the phone's toolbars slide away
+  let pending = 0;
+  new ResizeObserver(() => { cancelAnimationFrame(pending); pending = requestAnimationFrame(resize); }).observe(canvas.parentElement);
+}
 
 // ---- fog: add ----
 const PUFF_STOPS = [[0, 1], [0.2, 0.86], [0.4, 0.58], [0.6, 0.31], [0.8, 0.11], [1, 0]];   // bell-shaped, no visible edge
@@ -580,6 +587,7 @@ async function start() {
     }
   }
   goBtn.disabled = false; goBtn.textContent = 'bắt đầu';
+  if (window.musicResume) musicResume();            // opening the camera and mic can stop the music on a phone
 
   resize(); resetFog(); resetHands();
   fogPos.x = W / 2; fogPos.y = H * 0.45;
