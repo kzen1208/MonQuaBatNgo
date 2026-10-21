@@ -584,6 +584,7 @@ async function start() {
   resize(); resetFog(); resetHands();
   fogPos.x = W / 2; fogPos.y = H * 0.45;
   showUI(true);
+  if (window.musicTuck) musicTuck();               // the music card tucks into its corner button so the mirror is clear
   hintGone = false; hintEl.classList.remove('hidden', 'gone');
   running = true;
   startLoop();

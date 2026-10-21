@@ -48,35 +48,42 @@
 </button>
 
 <section id="after">
+  <div class="tl-stage tl-top" data-tl='{"text":"anh thương em","shape":"wave","direction":"reverse","speed":70,"curviness":58,"fontSize":40,"ribbonColor":"#ff8fb8","ribbonWidth":86,"viewH":340,"edgeFade":0.22,"draggable":true,"scrollBoost":0.7}'></div>
   <div class="wrap">
     <p class="eyebrow" data-bt='{"effect":"focus","animateBy":"letters","delay":26,"stepDuration":0.45,"blur":8,"distance":0}'>bức vẽ của em</p>
     <h2 data-bt='{"effect":"blur","animateBy":"words","direction":"top","delay":170,"stepDuration":0.5,"blur":14,"distance":46,"fromColor":"#f0a6c0","focusOnHover":true}'>em vất vả rồi | nghỉ chút nha.</h2>
     <p class="lede" data-bt='{"effect":"drift","animateBy":"words","direction":"left","delay":90,"stepDuration":0.45,"blur":8,"distance":24}'>cứ nhõng nhẽo đi, | có anh dỗ em mà.</p>
 
+    <div class="answer" id="answer" aria-live="polite">
+      <p class="answer-eyebrow" id="answerTag">một lời dành riêng cho bức vẽ này</p>
+      <p class="answer-msg" id="answerMsg">…</p>
+      <button class="btn soft" id="repick" type="button">bốc lại ♡</button>
+    </div>
+
     <p class="eyebrow" data-bt='{"effect":"focus","animateBy":"letters","delay":22,"stepDuration":0.4,"blur":6,"distance":0}'>vài lời dỗ dành</p>
     <div class="grid">
-      <div class="card note" style="--brand:#D6568A" data-colors='["#F2BECD", "#F7D2DD", "#E78FB3", "#FFD6E0"]'>
+      <div class="card note" data-msg="em xinh nhất trên đời luôn á, anh nói thật" style="--brand:#D6568A" data-colors='["#F2BECD", "#F7D2DD", "#E78FB3", "#FFD6E0"]'>
         <p><span class="vi">xinh lắm đó</span></p>
       </div>
-      <div class="card note" style="--brand:#8A63B5" data-colors='["#CDB4DB", "#E4D4F0", "#A98BC9", "#F3E8FF"]'>
+      <div class="card note" data-msg="em dịu dàng như sương sớm, ai gặp cũng thương" style="--brand:#8A63B5" data-colors='["#CDB4DB", "#E4D4F0", "#A98BC9", "#F3E8FF"]'>
         <p><span class="vi">dịu dàng như sương</span></p>
       </div>
-      <div class="card note" style="--brand:#E2764F" data-colors='["#FFC8A2", "#FFE0CC", "#FF9F80", "#FFF0E6"]'>
+      <div class="card note" data-msg="cười lên nào, nụ cười em làm anh vui cả ngày" style="--brand:#E2764F" data-colors='["#FFC8A2", "#FFE0CC", "#FF9F80", "#FFF0E6"]'>
         <p><span class="vi">cười lên nào</span></p>
       </div>
-      <div class="card note" style="--brand:#E0559A" data-colors='["#FFB3D1", "#B8E1FF", "#FFD6E8", "#D7F0FF"]'>
+      <div class="card note" data-msg="em ngọt hơn cả kẹo bông, anh nghiện mất rồi" style="--brand:#E0559A" data-colors='["#FFB3D1", "#B8E1FF", "#FFD6E8", "#D7F0FF"]'>
         <p><span class="vi">ngọt như kẹo bông</span></p>
       </div>
-      <div class="card note" style="--brand:#CF4B6C" data-colors='["#F4A6B7", "#FAD2DB", "#E27D95", "#FFE5EA"]'>
+      <div class="card note" data-msg="hôm nay em đẹp lắm đó, nhớ soi gương nha" style="--brand:#CF4B6C" data-colors='["#F4A6B7", "#FAD2DB", "#E27D95", "#FFE5EA"]'>
         <p><span class="vi">hôm nay em đẹp lắm</span></p>
       </div>
-      <div class="card note" style="--brand:#C98A12" data-colors='["#FFE7A0", "#FFF3CC", "#FFD166", "#FFF9E3"]'>
+      <div class="card note" data-msg="nghỉ một chút thôi, anh ngồi đây chờ em" style="--brand:#C98A12" data-colors='["#FFE7A0", "#FFF3CC", "#FFD166", "#FFF9E3"]'>
         <p><span class="vi">nghỉ một chút nha</span></p>
       </div>
-      <div class="card note" style="--brand:#3E9C7B" data-colors='["#BFE8D6", "#DDF4EA", "#8FD3B6", "#F0FBF6"]'>
+      <div class="card note" data-msg="em giỏi lắm rồi, anh tự hào về em nhiều lắm" style="--brand:#3E9C7B" data-colors='["#BFE8D6", "#DDF4EA", "#8FD3B6", "#F0FBF6"]'>
         <p><span class="vi">em giỏi lắm rồi</span></p>
       </div>
-      <div class="card note" style="--brand:#B24A7A" data-colors='["#F2BECD", "#CDB4DB", "#FFC8A2", "#BFE8D6"]'>
+      <div class="card note" data-msg="lại đây anh ôm một cái thật chặt nè" style="--brand:#B24A7A" data-colors='["#F2BECD", "#CDB4DB", "#FFC8A2", "#BFE8D6"]'>
         <p><span class="vi">ôm em một cái nè</span></p>
       </div>
 
@@ -97,7 +104,6 @@
   <div class="dots" aria-hidden="true"></div>
   <p class="eyebrow" data-bt='{"effect":"focus","animateBy":"letters","delay":24,"stepDuration":0.4,"blur":6,"distance":0}'>kéo thử xem nha</p>
   <div class="tl-stage" data-tl='{"text":"anh yêu em","shape":"wave","speed":84,"curviness":84,"fontSize":42,"ribbonColor":"#ff5c9a","ribbonWidth":92,"edgeFade":0.22,"draggable":true,"scrollBoost":0.7}'></div>
-  <div class="tl-stage" data-tl='{"text":"em iu cố lên hoặc đừng cố quá sức nha","shape":"line","tilt":-2.5,"direction":"reverse","speed":58,"fontSize":30,"fontWeight":700,"ribbonColor":"#ffd0e1","color":"#5a1b34","ribbonWidth":62,"viewH":150,"edgeFade":0.2,"separator":"✦","draggable":true}'></div>
   <p class="loop-foot" data-bt='{"effect":"blur","animateBy":"words","direction":"bottom","delay":150,"stepDuration":0.5,"blur":12,"distance":30,"fromColor":"#ff8fb8"}'>mệt thì ghé đây nha.</p>
 </section>
 

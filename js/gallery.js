@@ -76,6 +76,7 @@ function keepShot() {
   confirmOpen = false;                             // from here on `page` keeps the mirror frozen
   page = 'gallery';
   blurTexts.forEach(t => t.reset());              // the words come in again each time
+  resetDraw();                                    // a new picture gets a new answer
   fillGallery();
   appMenu.show();                                 // the menu appears once there is something to go to
   glassDesk.addPhoto(shotUrl, new Date());
@@ -149,3 +150,120 @@ new IntersectionObserver(entries => {
 
 const notes = [...document.querySelectorAll('#after .card.note')].map(el => ({ el, px: new PixelCard(el, JSON.parse(el.dataset.colors)) }));
 const photoPixels = new PixelCard($('photoCard'), ['#ffffff', '#f3efe8'], 6, 35);
+
+// ---- the draw ----
+// The notes round the picture light up one after another and stop on one: that note is the answer for this
+// drawing (picked from the drawing itself, so the same picture always gets the same one). The answer card above
+// runs through the notes like a slot machine while it happens, so it works on a phone where the notes are below the fold.
+const phone = window.matchMedia('(max-width: 760px)');
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const noteEls = notes.map(n => n.el);
+const RING = [0, 1, 2, 4, 7, 6, 5, 3];                              // clockwise round the picture on the wide layout
+const gridEl = document.querySelector('#after .grid'), answerEl = $('answer'), answerMsg = $('answerMsg'), answerTag = $('answerTag'), repickBtn = $('repick');
+const TAG_IDLE = 'một lời dành riêng cho bức vẽ này', TAG_DRAWING = 'đang bốc đáp án…', TAG_DONE = 'đáp án dành cho bức vẽ này';
+let drawToken = 0, drawn = false, lastWinner = -1, drawTimer = 0;
+
+noteEls.forEach(el => {                                             // each note's own pastel, used for the glow
+  const c = JSON.parse(el.dataset.colors);
+  el.style.setProperty('--c1', c[1]); el.style.setProperty('--c2', c[0]);
+});
+
+// the same picture gives the same number: a hash of a tiny copy of it
+function winnerFor(img) {
+  try {
+    const c = document.createElement('canvas'); c.width = c.height = 8;
+    const g = c.getContext('2d'); g.drawImage(img, 0, 0, 8, 8);
+    const d = g.getImageData(0, 0, 8, 8).data;
+    let h = 2166136261;
+    for (let i = 0; i < d.length; i += 4) { h ^= (d[i] >> 3) + (d[i + 1] >> 3) * 3 + (d[i + 2] >> 3) * 7; h = Math.imul(h, 16777619); }
+    return (h >>> 0) % noteEls.length;
+  } catch (e) { return Math.floor(Math.random() * noteEls.length); }
+}
+
+function light(i, on) {
+  noteEls[i].classList.toggle('lit', on);
+  notes[i].px.animate(on ? 'appear' : 'disappear');
+}
+
+function confetti(el) {
+  const r = el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  const marks = ['♡', '♥', '✦', '✿'], tints = ['#ff5c9a', '#ff8fb8', '#ffb3d1', '#e0407e'];
+  for (let i = 0; i < 18; i++) {
+    const s = document.createElement('span');
+    s.className = 'confetti'; s.textContent = marks[i % 4];
+    s.style.cssText = `left:${cx}px;top:${cy}px;color:${tints[i % 4]};font-size:${14 + Math.random() * 16}px`;
+    document.body.appendChild(s);
+    const a = Math.random() * Math.PI * 2, d = 70 + Math.random() * 130;
+    s.animate([
+      { transform: 'translate(-50%,-50%) scale(.4)', opacity: 1 },
+      { transform: `translate(calc(-50% + ${Math.cos(a) * d}px), calc(-50% + ${Math.sin(a) * d - 50}px)) scale(1) rotate(${Math.random() * 90 - 45}deg)`, opacity: 0 },
+    ], { duration: 1100 + Math.random() * 600, easing: 'cubic-bezier(.2,.7,.3,1)', fill: 'forwards' }).onfinish = () => s.remove();
+  }
+}
+
+function resetDraw() {
+  drawToken++; drawn = false; clearTimeout(drawTimer);
+  noteEls.forEach((el, i) => { if (el.classList.contains('lit') || el.classList.contains('win')) notes[i].px.animate('disappear'); el.classList.remove('lit', 'win'); });
+  gridEl.classList.remove('decided');
+  answerEl.classList.remove('drawing', 'shown');
+  answerTag.textContent = TAG_IDLE; answerMsg.classList.remove('blur-text'); answerMsg.textContent = '…';
+}
+
+function runDraw(winner) {
+  const my = ++drawToken;
+  clearTimeout(drawTimer);
+  noteEls.forEach(el => el.classList.remove('lit', 'win'));
+  gridEl.classList.remove('decided');
+  answerEl.classList.add('drawing'); answerEl.classList.remove('shown');
+  answerTag.textContent = TAG_DRAWING;
+  const order = phone.matches ? noteEls.map((_, i) => i) : RING;
+  const steps = reduceMotion.matches ? 1 : order.length * 2 + order.indexOf(winner) + 1;   // two laps, then on to the winner
+  let i = 0, prev = -1;
+  const step = () => {
+    if (my !== drawToken) return;
+    const idx = reduceMotion.matches ? winner : order[i % order.length];
+    if (prev >= 0 && prev !== idx) light(prev, false);
+    light(idx, true); prev = idx;
+    answerMsg.classList.remove('blur-text');
+    answerMsg.textContent = noteEls[idx].querySelector('.vi').textContent;                   // the card flickers through the words
+    i++;
+    if (i < steps) drawTimer = setTimeout(step, 70 + 380 * Math.pow(i / steps, 3));         // fast, then slower and slower
+    else land(winner, my);
+  };
+  step();
+}
+
+function land(winner, my) {
+  if (my !== drawToken) return;
+  const el = noteEls[winner];
+  el.classList.add('win'); gridEl.classList.add('decided');
+  confetti(el);
+  answerEl.classList.remove('drawing'); answerEl.classList.add('shown');
+  answerTag.textContent = TAG_DONE;
+  new BlurText(answerMsg, { text: el.dataset.msg, effect: 'blur', direction: 'top', trigger: 'load', animateBy: 'words', delay: 90, stepDuration: 0.5, blur: 12, distance: 30 });
+  lastWinner = winner;
+}
+
+// the draw starts once the answer card is on screen
+new IntersectionObserver(entries => {
+  if (!entries[0].isIntersecting || drawn || page !== 'gallery') return;
+  drawn = true;
+  drawTimer = setTimeout(() => runDraw(winnerFor(shotImg)), 600);
+}, { threshold: 0.75 }).observe(answerEl);
+
+repickBtn.addEventListener('click', () => {
+  let w;
+  do { w = Math.floor(Math.random() * noteEls.length); } while (w === lastWinner && noteEls.length > 1);
+  runDraw(w);
+});
+
+// on a phone the notes come up one by one as they scroll into view
+const revealIO = new IntersectionObserver(entries => {
+  for (const e of entries) {
+    if (!e.isIntersecting) continue;
+    revealIO.unobserve(e.target);
+    const k = noteEls.indexOf(e.target) % 2;
+    setTimeout(() => e.target.classList.remove('pre'), k * 90);
+  }
+}, { threshold: 0.2 });
+if (phone.matches && !reduceMotion.matches) noteEls.forEach(el => { el.classList.add('pre'); revealIO.observe(el); });

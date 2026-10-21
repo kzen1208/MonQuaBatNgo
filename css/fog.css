@@ -1,6 +1,6 @@
 @font-face { font-family: "Super Bouncer"; src: url("../font/1FTV-VIP-Super-Bouncer.ttf") format("truetype"); font-weight: 400; font-style: normal; font-display: swap; }
 :root { --display: "Super Bouncer", "Snell Roundhand", cursive; }
-.display, #start h1, #start button, .note .vi, #confirm p, .gf-label, #after h2, #after .lede, .loop-foot, .tl-stage { font-family: var(--display); font-weight: 400; font-synthesis: none; }
+.display, #start h1, #start button, .note .vi, #confirm p, .gf-label, #after h2, #after .lede, .answer-msg, .loop-foot, .tl-stage { font-family: var(--display); font-weight: 400; font-synthesis: none; }
   :root { color-scheme: dark; --glass: rgba(255,208,228,0.16); --edge: rgba(255,196,222,0.5);
     --wine: #1f0a18; --ink: #5a1b34; --rose: #e0407e; --blush: #ffd0e1; --petal: #f9edf0; }
   * { box-sizing: border-box; }
@@ -51,7 +51,7 @@
   @keyframes pop { 0% { opacity: .85 } 100% { opacity: 0 } }
 
   /* ---- after the mirror: the drawing you left, and the pixel logo grid ---- */
-  #after { position: relative; z-index: 2; margin-top: -28px; padding: 96px 0 120px; border-radius: 28px 28px 0 0;
+  #after { position: relative; z-index: 2; margin-top: -28px; padding: 32px 0 120px; overflow: hidden; border-radius: 28px 28px 0 0;
     background: var(--petal); color: var(--ink); min-height: 100vh; box-shadow: 0 -30px 60px rgba(60,10,40,.35); }
   #after .wrap { width: min(1080px, 100% - 48px); margin: 0 auto; text-align: center; }
   .eyebrow { margin: 0 0 14px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: #b07a90; }
@@ -127,6 +127,59 @@
   .tl svg { display: block; width: 100%; height: auto; }
   .tl-measure { visibility: hidden; pointer-events: none; }
   .tl-text { user-select: none; -webkit-user-select: none; }
-  .loop-foot { position: relative; justify-content: center; margin: 80px 24px 0; font-size: clamp(30px, 4.8vw, 60px); letter-spacing: 0; color: #ffe3ee; }
+  .loop-foot { position: relative; justify-content: center; margin: 36px 24px 0; font-size: clamp(30px, 4.8vw, 60px); letter-spacing: 0; color: #ffe3ee; }
 
   #startSlide { margin-top: 30px; }
+
+  /* ---- the wave above the heading ---- */
+  .tl-top { margin: 0 0 6px; }
+
+  /* ---- the answer: one sweet line picked for this drawing ---- */
+  .answer { position: relative; width: min(640px, 100%); margin: 0 auto 64px; padding: 24px 22px 22px; border-radius: 26px; text-align: center;
+    background: linear-gradient(140deg, #fff7fa, #ffe1ec); border: 1px solid rgba(224,64,126,.28); box-shadow: 0 18px 44px rgba(224,64,126,.16); }
+  .answer-eyebrow { margin: 0 0 12px; font: 12px/1.4 -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #b07a90; }
+  .answer-msg { margin: 0 auto; max-width: 18em; min-height: 2.4em; display: flex; align-items: center; justify-content: center; text-align: center;
+    font-size: clamp(24px, 5.2vw, 40px); line-height: 1.2; color: #5a1b34; transition: filter .15s, opacity .15s; }
+  .answer.drawing .answer-msg { opacity: .55; filter: blur(.6px); }
+  .answer .btn.soft { margin-top: 14px; color: #b03a73; background: transparent; border: 1px solid rgba(224,64,126,.4); }
+  .answer .btn.soft:hover { background: rgba(224,64,126,.1); }
+  .answer.drawing .btn.soft { visibility: hidden; }
+
+  /* the draw: notes light up one after another and stop on the answer */
+  .card.note { transition: transform .22s cubic-bezier(.2,1,.3,1), box-shadow .3s, opacity .45s, background .3s, border-color .3s; }
+  .card.note.lit { background: linear-gradient(145deg, var(--c1, #ffe0ec), var(--c2, #ffc1d8)); border-color: var(--brand); transform: scale(1.03);
+    box-shadow: 0 14px 34px color-mix(in srgb, var(--brand) 30%, transparent); }
+  .card.note.lit .vi, .card.note.win .vi { color: var(--brand); }
+  .card.note.win { background: linear-gradient(145deg, var(--c1, #ffe0ec), var(--c2, #ffc1d8)); border-color: var(--brand); z-index: 4; transform: scale(1.06);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 26%, transparent), 0 22px 50px color-mix(in srgb, var(--brand) 38%, transparent);
+    animation: win-pop .7s cubic-bezier(.2,1.5,.4,1); }
+  @keyframes win-pop { 0% { transform: scale(1.03); } 45% { transform: scale(1.12); } 100% { transform: scale(1.06); } }
+  .grid.decided .card.note:not(.win) { opacity: .55; }
+  .confetti { position: fixed; z-index: 45; pointer-events: none; font-family: sans-serif; will-change: transform, opacity; }
+
+  @media (max-width: 760px) {
+    /* the wave is drawn bigger, so its words can be read on a phone */
+    #after { padding-top: 64px; }
+    .tl-top { overflow: hidden; margin-bottom: 0; }
+    .tl-top .tl { width: 230%; max-width: none; margin-left: -65%; }
+    #after .wrap { width: calc(100% - 32px); }
+    .answer { margin-bottom: 40px; padding: 20px 16px 18px; border-radius: 22px; }
+
+    /* the photo is a polaroid, the words sit under it instead of over it */
+    .card.photo { aspect-ratio: auto; display: flex; flex-direction: column; padding: 10px 10px 12px; background: #fff; border-radius: 22px;
+      transform: rotate(-1.4deg); box-shadow: 0 22px 46px rgba(190,70,120,.26); }
+    .card.photo img { position: static; width: 100%; height: auto; aspect-ratio: 4 / 3; border-radius: 14px; }
+    .meta { position: static; margin-top: 10px; padding: 0 2px; color: #8a3d62; background: none; border: 0; -webkit-backdrop-filter: none; backdrop-filter: none;
+      justify-content: space-between; text-align: left; gap: 8px; }
+    .meta #shotCap { font-size: 12.5px; }
+    .meta #shotCap { flex: 1 1 100%; text-align: center; }
+    .meta .btn { flex: 1; justify-content: center; }
+    .meta .btn.ghost { color: #b03a73; background: transparent; border-color: rgba(224,64,126,.4); }
+
+    /* no hover on a phone: every note carries its own colour from the start */
+    .card.note { background: linear-gradient(145deg, var(--c1, #ffe0ec), var(--c2, #ffc1d8)); border-color: transparent; padding: 22px 12px; }
+    .note .vi { color: color-mix(in srgb, var(--brand) 62%, #2b0f22); font-size: clamp(22px, 6.4vw, 28px); }
+    .card.note.pre { opacity: 0; transform: translateY(22px) scale(.95); }
+    .card.note.lit { background: linear-gradient(145deg, var(--c2, #ffc1d8), var(--c1, #ffe0ec)); }
+  }
+  @media (prefers-reduced-motion: reduce) { .card.note.win { animation: none; } }
