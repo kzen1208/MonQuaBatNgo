@@ -43,12 +43,16 @@ async function scanMusic() {
   // songs come from music/playlist.json (works on any host) and from the folder listing (the dev server shows one);
   // whatever is in either is played, so dropping a file in is enough while developing
   const files = [], seen = new Set();
-  const add = f => { if (f.file && !seen.has(f.file)) { seen.add(f.file); files.push(f); } };
+  const add = f => {
+    if (!f.file) return;
+    f.file = f.file.normalize('NFC');                                 // a Linux host matches names byte for byte; git stores them composed
+    if (!seen.has(f.file)) { seen.add(f.file); files.push(f); }
+  };
   try {
     const res = await fetch(MUSIC_DIR + 'playlist.json', { cache: 'no-store' });
     if (res.ok) (await res.json()).forEach(f => add(typeof f === 'string' ? { file: f } : f));
   } catch (e) { /* no playlist file */ }
-  try {
+  if (/^(localhost|127\.|\[::1\]|.*\.local)$/.test(location.hostname)) try {     // a hosted site has no folder listing: only ask while developing
     const res = await fetch(MUSIC_DIR, { cache: 'no-store' });
     if (res.ok) {
       const doc = new DOMParser().parseFromString(await res.text(), 'text/html');

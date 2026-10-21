@@ -26,7 +26,10 @@ const STAR_SIZE = 15, GHOST_SIZE = 6;
 
 const WIPE_MULT = 1.6, WIPE_ALPHA = 0.34, WIPE_SOFT = 0.60, WIPE_MAX_STAMPS = 40, WIPE_JUMP = 0.30, WIPE_EASE = 0.5;
 // an open hand wipes like a real one, but only while it sweeps across the glass (speeds in palm widths per second)
-const WIPE_OPEN = 0.9, SWEEP_ON = 1.3, SWEEP_OFF = 0.55, SWEEP_EASE = 0.5;
+const WIPE_OPEN = 0.9, SWEEP_ON = 1.5, SWEEP_OFF = 0.55, SWEEP_EASE = 0.5;
+// ...and only a flat, spread palm: four fingers straight out, the thumb well away from the index, held that way for a moment,
+// and never right after (or next to) drawing, when the hand is just travelling to the next stroke
+const FLAT_OUT = 1.15, OPEN_RATIO = 0.6, SWEEP_DWELL = 200, SWEEP_COOLDOWN = 800, SWEEP_PRESENT = 700;   // a hand that has only just come into view does not wipe
 
 // ---- elements ----
 const $ = id => document.getElementById(id);
@@ -59,6 +62,7 @@ const pt = () => ({ x: 0, y: 0 });
 function newHand() {
   return { present: false, seenAt: 0, ratio: 1, pinched: false, penDown: false, released: 0, lastPinchAt: 0,
     fist: false, pinch: pt(), palm: pt(), hand: pt(), width: 40, speed: 0, sweeping: false, sampleAt: 0, samplePalm: pt(),
+    openSince: 0, penAt: 0, firstSeen: 0,
     sm1: pt(), brush: pt(), prev: pt(), mid: pt(), lastDraw: pt(), star: pt(), starOn: false,
     wipePrev: null, wipePos: null, wipeR: 30 };
 }
@@ -186,7 +190,7 @@ function onHands(res) {
 }
 
 function loseHand(h, now) {
-  h.present = false; h.fist = false; h.sweeping = false; h.speed = 0; h.sampleAt = 0;
+  h.present = false; h.fist = false; h.sweeping = false; h.speed = 0; h.sampleAt = 0; h.openSince = 0;
   if (h.penDown) { h.released++; maybeLift(h, now); }   // keep the pen through a flicker
   else h.pinched = false;
 }
@@ -197,6 +201,7 @@ function updateHand(h, lm, wl, now) {
   // and turning the hand does not shrink the reference length. Metric world landmarks when available.
   const P = wl ? (i => wl[i]) : (i => ({ x: lm[i].x * vw, y: lm[i].y * vh, z: lm[i].z * vw }));
   const d3 = (a, b) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
+  if (!h.present) h.firstSeen = now;
   h.present = true; h.seenAt = now;
 
   h.ratio = d3(P(4), P(8)) / d3(P(0), P(9));
@@ -225,9 +230,6 @@ function updateHand(h, lm, wl, now) {
     h.speed += (inst - h.speed) * SWEEP_EASE;
   } else h.speed = 0;
   h.sampleAt = now; h.samplePalm.x = h.palm.x; h.samplePalm.y = h.palm.y;
-  if (h.pinched) h.sweeping = false;
-  else if (!h.sweeping && h.speed > SWEEP_ON) h.sweeping = true;
-  else if (h.sweeping && h.speed < SWEEP_OFF) h.sweeping = false;
 
   if (!h.penDown) {
     // the extended index is what separates a pinch from a fist with the thumb resting on it
@@ -242,7 +244,17 @@ function updateHand(h, lm, wl, now) {
     h.released++; maybeLift(h, now);
   }
   h.fist = fist && !h.penDown;
-  h.open = !fist && !h.pinched && !h.penDown;
+
+  // open-hand wipe: a flat palm, held open for a moment, that is moving; never while pinching or just after drawing
+  const straight = (tip, pip) => d3(wr, P(tip)) > d3(wr, P(pip)) * FLAT_OUT;
+  const flat = straight(8, 6) && straight(12, 10) && straight(16, 14) && straight(20, 18);
+  const palmOpen = flat && h.ratio > OPEN_RATIO && !fist && !h.pinched && !h.penDown;
+  if (h.pinched || h.penDown || h.ratio < PEN_UP) h.penAt = now;      // a hand that is nearly pinching is about to draw
+  h.openSince = palmOpen ? (h.openSince || now) : 0;
+  const ready = palmOpen && now - h.openSince > SWEEP_DWELL && now - h.penAt > SWEEP_COOLDOWN && now - h.firstSeen > SWEEP_PRESENT;
+  if (!ready) h.sweeping = false;
+  else if (!h.sweeping && h.speed > SWEEP_ON) h.sweeping = true;
+  else if (h.sweeping && h.speed < SWEEP_OFF) h.sweeping = false;
 }
 function maybeLift(h, now) {
   if (h.released >= LIFT_FRAMES && now - h.lastPinchAt >= LIFT_MS) { h.penDown = false; h.pinched = false; }
@@ -267,7 +279,9 @@ function stepPen(h) {
 }
 
 function stepWipe(h) {
-  const open = h.open && h.sweeping;                                  // an open hand moving across the glass
+  const now = performance.now();
+  const other = tracked.some(o => o !== h && (o.penDown || now - o.penAt < SWEEP_COOLDOWN));   // the other hand is drawing
+  const open = h.sweeping && !other;                                  // a flat hand moving across the glass
   if (!(h.present && (h.fist || open) && !h.penDown)) { h.wipePrev = null; h.wipePos = null; return; }
   const at = h.fist ? h.palm : h.hand, r = (h.fist ? WIPE_MULT : WIPE_OPEN) * h.width;
   if (!h.wipePos) { h.wipePos = { x: at.x, y: at.y }; h.wipeR = r; }
