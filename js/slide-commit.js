@@ -25,7 +25,7 @@ const SC_EASE_OUT = scBezier(0.23, 1, 0.32, 1);
 const scJobs = new Set();
 let scRaf = 0, scLast = 0;
 function scTick(now) {
-  const dt = Math.min(0.05, (now - scLast) / 1000);
+  const dt = Math.min(0.05, Math.max(0, (now - scLast) / 1000));
   scLast = now;
   for (const job of [...scJobs]) job.step(dt);
   scRaf = scJobs.size ? requestAnimationFrame(scTick) : 0;

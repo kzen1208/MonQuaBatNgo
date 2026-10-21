@@ -121,7 +121,8 @@
   };
   try { liked = new Set(JSON.parse(store.get('musicLiked') || '[]')); } catch (e) { /* ignore */ }
   { const v = parseFloat(store.get('musicVolume')); if (v >= 0 && v <= 1) userVol = v; }
-  audio.volume = userVol;
+  const setVol = v => { audio.volume = Math.min(1, Math.max(0, v || 0)); };      // the element throws outside 0..1
+  setVol(userVol);
 
   const fmt = s => { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
 
@@ -208,8 +209,8 @@
     const id = ++fadeId, from = audio.volume, t0 = performance.now();
     const step = now => {
       if (id !== fadeId) return;
-      const k = Math.min(1, (now - t0) / ms);
-      audio.volume = from + (target - from) * k;
+      const k = Math.min(1, Math.max(0, (now - t0) / ms));                         // the frame time can be a hair before t0
+      setVol(from + (target - from) * k);
       if (k < 1) requestAnimationFrame(step); else if (then) then();
     };
     requestAnimationFrame(step);
@@ -220,7 +221,7 @@
       return false;
     }
     if (!audio.src) loadTrack();
-    audio.volume = 0;
+    setVol(0);
     try { await audio.play(); } catch (e) { if (!quiet) toast('không phát được bài này.'); return false; }
     fadeTo(userVol, FADE_MS);
     return true;
@@ -231,7 +232,7 @@
     const was = !audio.paused;
     at = (at + step + tracks.length) % tracks.length;
     loadTrack();
-    if (was || byUser) { userPaused = false; audio.volume = userVol; audio.play().catch(() => {}); }
+    if (was || byUser) { userPaused = false; setVol(userVol); audio.play().catch(() => {}); }
   }
   const next = byUser => go(1, byUser), prev = byUser => {
     if (audio.currentTime > 3) { audio.currentTime = 0; return; }          // like any player: the first press restarts the song
@@ -323,11 +324,11 @@
   }
   drag(prog, p => { if (audio.duration) audio.currentTime = p * audio.duration; });
   drag(vol, p => {
-    userVol = p; audio.muted = p === 0; fadeId++; audio.volume = p; store.set('musicVolume', p); paintVol();
+    userVol = p; audio.muted = p === 0; fadeId++; setVol(p); store.set('musicVolume', p); paintVol();
   });
   muteBtn.addEventListener('click', e => {
     audio.muted = !audio.muted;
-    if (!audio.muted && userVol === 0) { userVol = VOL; audio.volume = VOL; }
+    if (!audio.muted && userVol === 0) { userVol = VOL; setVol(VOL); }
     paintVol(); if (e.detail) muteBtn.blur();
   });
   prog.addEventListener('keydown', e => {
@@ -338,7 +339,7 @@
   vol.addEventListener('keydown', e => {
     const d = e.key === 'ArrowRight' ? 0.05 : e.key === 'ArrowLeft' ? -0.05 : 0;
     if (!d) return;
-    e.preventDefault(); userVol = Math.min(1, Math.max(0, userVol + d)); audio.muted = userVol === 0; fadeId++; audio.volume = userVol; store.set('musicVolume', userVol); paintVol();
+    e.preventDefault(); userVol = Math.min(1, Math.max(0, userVol + d)); audio.muted = userVol === 0; fadeId++; setVol(userVol); store.set('musicVolume', userVol); paintVol();
   });
   // keys typed in the music corner are not the mirror's (Space must not fog the glass from a button)
   el.addEventListener('keydown', e => {
@@ -383,7 +384,7 @@
   async function autoStart() {
     if (!tracks.length || !audio.paused || userPaused || pane !== 'mine') return;
     if (!audio.src) loadTrack();
-    audio.volume = 0;
+    setVol(0);
     try { await audio.play(); fadeTo(userVol, FADE_IN_MS); }
     catch (e) { armFirstGesture(); }
   }
@@ -395,7 +396,7 @@
       names.forEach(n => window.removeEventListener(n, first, true));
       armed = false;
       if (el.contains(e.target) || userPaused || !audio.paused || pane !== 'mine') return;     // the music buttons do their own thing
-      audio.volume = 0;
+      setVol(0);
       audio.play().then(() => fadeTo(userVol, FADE_IN_MS)).catch(armFirstGesture);
     };
     names.forEach(n => window.addEventListener(n, first, true));
